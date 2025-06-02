@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Input Detail Rapat</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+</head>
+<body style="font-family: rockwell;">
+
+    {{-- form create --}}
+<div class="container py-5 mx-auto">
+    <form id="farmForm" action="{{ route('notulen.store') }}" method="post">
+    @csrf
+    <div class="text-align-left">
+        <div class="row align-items-start">
+        <div class="col-3">
+            <label for="dateInput" class="form-label d-flex align-items-center">Tanggal*</label>
+            <input type="date" class="form-control" id="dateInput" name="dateInput" placeholder="tanggal">
+        </div>
+        <div class="col-3">
+            <label for="timeInput" class="form-label">Waktu*</label>
+            <input type="time" class="form-control" id="timeInput" name="timeInput" placeholder="waktu">
+        </div>
+        </div>
+        <div class="mt-4">
+        <div class="row align-items-center">
+            <div class="col">
+            <label for="place" class="form-label">Tempat*</label>
+            <input type="text" class="form-control" id="place" name="place" placeholder="ketik nama tempat">
+            </div>
+            <div class="col">
+            <label for="chairman" class="form-label">Pimpinan Musyawarah*</label>
+            <input type="text" class="form-control" id="chairman" name="chairman" placeholder="ketik nama pimpinan musyawarah">
+            </div>
+        </div>
+        </div>
+        <div class="mt-4">
+        <div class="row align-items-center">
+            <div class="col">
+            <label for="notulen" class="form-label">Notulis</label>
+            <input type="text" class="form-control" id="notulen" name="notulen" placeholder="ketik nama notulis">
+            </div>
+            <div class="col">
+            <label for="agenda" class="form-label">Agenda Rapat*</label>
+            <input type="text" class="form-control" id="agenda" name="agenda" placeholder="ketik agenda">
+            </div>
+        </div>
+        </div>
+        <div class="col-md-12 mt-4">
+        <label for="pembahasan" class="form-label">Pembahasan</label>
+        <textarea type="text" class="form-control" id="pembahasan" name="pembahasan" rows="7" placeholder="ketik pembahasan"></textarea>
+        </div>
+        <div class="row align-items-end mt-4">
+            <div class="col-6">
+                <label for="keputusan" class="form-label">Keputusan</label>
+                <input type="text" class="form-control" id="keputusan" name="keputusan"  placeholder="ketik keputusan">
+            </div>
+        <div class="col">
+            <div class="dropdown" style="width: 80%;">
+            <label for="keterangan" class="form-label">Keterangan</label>
+            <select class="form-select" aria-label="Default select example" name="keterangan" id="keterangan">
+                <option value="" disabled selected>Pilih keterangan</option>
+                <option value="Eksekusi">Eksekusi</option>
+                <option value="Eskalasi">Eskalasi</option>
+            </select>
+            </div>
+    </div>
+        <div class="col">
+            <div class="text-end">
+                <button type="button" class="btn btn-outline-danger" id="backButton">
+                    <i class="bi bi-arrow-left-circle"></i> Kembali
+                </button>
+                <button type="button" class="btn btn-outline-info ms-2 w-12" id="btn-simpan">
+                <i class="bi bi-plus-circle"></i> Simpan
+                </button>
+            </div>
+        </div>
+        </div>
+    </div>
+    </form>
+</div>
+    {{-- batas form create --}}
+
+<!-- SCRIPT GROUP -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+{{--Konfirmasi sebelum kembali ke halaman utama --}}
+<script>
+document.getElementById("backButton").addEventListener("click", function() {
+    Swal.fire({
+        title: "Apakah Anda yakin ingin kembali?",
+        text: "Data Tidak Akan Disimpan!",
+        icon: "error",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Ya, Kembali",
+        cancelButtonText: "Batal",
+          allowOutsideClick: false, // Klik di luar tidak akan menutup modal
+          allowEscapeKey: false // Tekan ESC tidak akan menutup modal
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = "{{ route('notulen.index') }}";
+        }
+    });
+});
+</script>
+{{-- batas konfirmasi kembali --}}
+
+{{-- konfirmasi input --}}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById("farmForm");
+    const btnSimpan = document.getElementById("btn-simpan");
+
+    // Data input yang wajib diisi
+    const requiredInputs = [
+        { id: "dateInput", name: "Tanggal" },
+        { id: "timeInput", name: "Waktu" },
+        { id: "place", name: "Tempat" },
+        { id: "chairman", name: "Pimpinan Musyawarah" },
+        { id: "agenda", name: "Agenda Rapat" },
+        { id: "notulen", name: "Notulis" },
+        { id: "pembahasan", name: "Pembahasan", type: "textarea" }, // Tambahkan pembahasan
+        { id: "keputusan", name: "Keputusan" },
+        { id: "keterangan", name: "Keterangan", type: "select", errorMsg: "Pilih Keterangan !" } // Tambahkan select keterangan
+    ];
+
+    btnSimpan.addEventListener("click", function (event) {
+        event.preventDefault();
+        let isValid = true;
+        let errorMessages = [];
+
+        // Hapus pesan error sebelumnya
+        document.querySelectorAll(".error-message").forEach(e => e.remove());
+
+        // Cek input wajib
+        requiredInputs.forEach(input => {
+            let element = document.getElementById(input.id);
+            if (element) {
+                if ((input.type === "select" && element.value === "") || element.value.trim() === "") {
+                    isValid = false;
+                    let errorMessage = input.errorMsg ? input.errorMsg :  `${input.name} belum diisi!`;
+                    errorMessages.push(`${input.name} tidak boleh kosong!`);
+                    showError(element, errorMessage);
+                }
+            }
+        });
+
+        // Jika ada error, tampilkan SweetAlert2 dengan daftar error
+        if (!isValid) {
+            Swal.fire({
+                title: "Terjadi Kesalahan!",
+                html: `<ul style="text-align: left;">${errorMessages.map(msg => `<li>${msg}</li>`).join('')}</ul>`,
+                icon: "error",
+                confirmButtonText: "OK"
+            });
+            return;
+        }
+
+        // Jika valid, tampilkan konfirmasi sebelum menyimpan
+        Swal.fire({
+            title: "Konfirmasi Simpan",
+            text: "Apakah data sudah benar dan ingin disimpan?",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Ya, Simpan",
+            cancelButtonText: "Batal",
+            allowOutsideClick: false,
+            allowEscapeKey: false
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit(); // Submit form setelah konfirmasi
+            }
+        });
+    });
+
+    // Hapus pesan error saat user mengetik atau mengubah input
+    requiredInputs.forEach(input => {
+        let element = document.getElementById(input.id);
+        if (element) {
+            element.addEventListener("input", function () {
+                removeError(element);
+            });
+            element.addEventListener("change", function () {
+                removeError(element);
+            });
+        }
+    });
+
+    // Fungsi menampilkan error di bawah input
+    function showError(inputElement, message) {
+        let errorSpan = document.createElement("span");
+        errorSpan.classList.add("error-message");
+        errorSpan.style.color = "red";
+        errorSpan.style.fontSize = "12px";
+        errorSpan.textContent = message;
+        inputElement.insertAdjacentElement("afterend", errorSpan);
+    }
+
+    // Fungsi menghapus pesan error saat input berubah
+    function removeError(inputElement) {
+        let errorSpan = inputElement.nextElementSibling;
+        if (errorSpan && errorSpan.classList.contains("error-message")) {
+            errorSpan.remove();
+        }
+    }
+});
+</script>
+
+{{-- INPUT WAKTU DAN TANGGAL SEBELUM NOW --}}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const dateInput = document.getElementById("dateInput");
+        const timeInput = document.getElementById("timeInput");
+
+
+        const today = new Date();
+        const formattedDate = today.toISOString().split("T")[0];
+        dateInput.setAttribute("min", formattedDate);
+
+        function updateTimeMin() {
+            const selectedDate = dateInput.value;
+            const currentTime = today.toTimeString().slice(0, 5);
+
+            if (selectedDate === formattedDate) {
+                timeInput.setAttribute("min", currentTime);
+            } else {
+                timeInput.removeAttribute("min");
+            }
+        }
+
+        dateInput.addEventListener("change", updateTimeMin);
+    });
+</script>
+
+</body>
+</html>
+
+<!-- MODAL KEMBALI -->
+{{-- <div class="modal fade" id="kembali" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="kembaliLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+        <div class="modal-header d-flex justify-content-between align-items-center">
+        <h1 class="modal-title fs-5" id="kembaliLabel">PERINGATAN !</h1>
+        <button type="button" class="btn" data-bs-dismiss="modal" aria-label="Close" style="color: #dc3545">
+            <i class="bi bi-x-square fs-5" style="text-shadow: 1px 1px 2px black;"></i>
+        </button>
+        </div>
+        <div class="modal-body">
+        APAKAH ANDA INGIN KEMBALI? DATA TIDAK AKAN DISIMPAN.
+        </div>
+        <div class="modal-footer">
+        <a href="/index">
+            <button type="button" class="btn btn-outline-danger">Tetap Kembali</button>
+        </a>
+        </div>
+    </div>
+    </div>
+</div> --}}
+<!-- END MODAL KEMBALI -->
+
+{{-- <!-- MODAL KONFIRMASI SIMPAN -->
+<div class="modal fade" id="modalKonfirmasi" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="modalKonfirmasiLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-sm">
+    <div class="modal-content">
+        <div class="modal-header">
+        <h5 class="modal-title" id="modalKonfirmasiLabel">Konfirmasi Simpan</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+        Apakah data sudah benar dan ingin disimpan?
+        </div>
+        <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-primary" id="confirmSave">Simpan</button>
+        </div>
+    </div>
+    </div>
+</div>
+<!-- END MODAL KONFIRMASI SIMPAN -->
+
+<!-- MODAL SIMPAN (Success Message) -->
+{{-- <div class="modal fade" id="simpan" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="simpanLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-sm">
+    <div class="modal-content">
+        <div class="modal-header d-flex justify-content-between align-items-center" style="min-height: 50px; padding: 8px 15px;">
+        <h1 class="modal-title fs-5" id="simpanLabel">SUKSES</h1>
+        <button type="button" class="btn" data-bs-dismiss="modal" aria-label="Close" style="color: #dc3545">
+            <i class="bi bi-x-square fs-5" style="text-shadow: 1px 1px 2px black;"></i>
+        </button>
+        </div>
+        <div class="modal-body">
+        DATA BERHASIL DISIMPAN !
+        </div>
+        <div class="modal-footer">
+        <a href="/index">
+            <button type="button" class="btn btn-outline-primary" style="--bs-btn-font-size: .60rem;">OK, MAKASIH MIN !</button>
+        </a>
+        </div>
+    </div>
+    </div>
+</div> --}}
+<!-- END MODAL SIMPAN (Success Message) -->
