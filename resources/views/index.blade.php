@@ -53,7 +53,6 @@
                             <th>Tempat</th>
                             <th>Pimpinan</th>
                             <th>Agenda</th>
-                            <th>coba</th>
                             <th>Aksi</th>
                         </tr>
                     </thead>
