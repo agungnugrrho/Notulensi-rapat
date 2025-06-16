@@ -9,6 +9,7 @@
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
     <link rel="stylesheet" href="icon1.css">
+    <link rel="stylesheet" href="{{ asset('css/footer.css') }}">
 
     {{-- css icon info --}}
     <style>
@@ -193,6 +194,10 @@
     {{-- batas notifikasi --}}
 
 </body>
+
+<footer class="site-footer">
+    @include('layout.footer')
+</footer>
 
 </html>
 

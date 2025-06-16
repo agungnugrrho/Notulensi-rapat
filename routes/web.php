@@ -6,11 +6,11 @@ use App\Http\Controllers\NotulenController;
 use App\Http\Controllers\absenController;
 use App\Models\Notulen;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// Route::get('/', function () {
+//     return view('welcome');
+// });
 
-Route::get('/index', [NotulenController::class,'index'])->name('notulen.index');
+Route::get('/', [NotulenController::class,'index'])->name('notulen.index');
 Route::get('/notulen/{id}', [NotulenController::class, 'show'])->name('notulen.show');
 Route::get('/frame1', [NotulenController::class, 'create'])->name('frame1');
 Route::post('/notulen/store', [NotulenController::class, 'store'])->name('notulen.store');
